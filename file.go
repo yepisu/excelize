@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"unicode/utf8"
 )
 
 // NewFile provides a function to create new file by default template.
@@ -67,8 +68,14 @@ func (f *File) Save(opts ...Options) error {
 // SaveAs provides a function to create or update to a spreadsheet at the
 // provided path.
 func (f *File) SaveAs(name string, opts ...Options) error {
-	if len(name) > MaxFilePathLength {
-		return ErrMaxFilePathLength
+	//if len(name) > MaxFilePathLength {
+	//	return ErrMaxFilePathLength
+	//}
+	if len(opts) > 0 { // 增加配置项是否验证文件路径长度
+		options := opts[0]
+		if options.CheckFilePathLength && utf8.RuneCountInString(name) > MaxFilePathLength {
+			return ErrMaxFilePathLength
+		}
 	}
 	f.Path = name
 	if _, ok := supportedContentTypes[strings.ToLower(filepath.Ext(f.Path))]; !ok {
